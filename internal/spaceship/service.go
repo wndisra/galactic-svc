@@ -6,6 +6,7 @@ import (
 	"github.com/go-kit/log"
 
 	"github.com/wndisra/galactic-svc/internal/entity"
+	"github.com/wndisra/galactic-svc/internal/helpers"
 )
 
 type SpaceShipRepository interface {
@@ -14,6 +15,7 @@ type SpaceShipRepository interface {
 	Update(ctx context.Context, id int64, spaceship entity.SpaceShip) error
 	Delete(ctx context.Context, id int64) error
 	GetAll(ctx context.Context, req entity.SpaceShip) ([]entity.SpaceShip, error)
+	DeleteArmaments(ctx context.Context, spaceshipID int64) error
 }
 
 type service struct {
@@ -42,7 +44,21 @@ func (s *service) GetByID(ctx context.Context, id int64) (entity.SpaceShip, erro
 }
 
 func (s *service) Update(ctx context.Context, id int64, spaceship entity.SpaceShip) error {
-	err := s.repo.Update(ctx, id, spaceship)
+	spaceship, err := s.repo.GetByID(ctx, id)
+	if err != nil {
+		return err
+	}
+
+	if spaceship.ID == 0 {
+		return helpers.ErrBadRequest
+	}
+
+	err = s.repo.DeleteArmaments(ctx, id)
+	if err != nil {
+		return err
+	}
+
+	err = s.repo.Update(ctx, id, spaceship)
 	if err != nil {
 		return err
 	}

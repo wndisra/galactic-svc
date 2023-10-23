@@ -74,13 +74,31 @@ type armamentReq struct {
 	Qty   int    `json:"qty"`
 }
 
+type armamentResponse struct {
+	Title string `json:"title"`
+	Qty   int    `json:"qty"`
+}
+
 func decodeCreateRequest(ctx context.Context, r *http.Request) (request interface{}, err error) {
 	var req createRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		return nil, fmt.Errorf("decodeCreateRequest(): %s", err)
 	}
 
-	return CreateRequestModel(req), nil
+	armaments := make([]armamentReqModel, len(req.Armaments))
+	for i, armament := range req.Armaments {
+		armaments[i] = armamentReqModel(armament)
+	}
+
+	return CreateRequestModel{
+		Name:      req.Name,
+		Class:     req.Class,
+		Crew:      req.Crew,
+		Image:     req.Image,
+		Value:     req.Value,
+		Status:    req.Status,
+		Armaments: armaments,
+	}, nil
 }
 
 func encodeCreateResponse(ctx context.Context, w http.ResponseWriter, response interface{}) error {
@@ -125,8 +143,14 @@ func encodeGetByIDResponse(ctx context.Context, w http.ResponseWriter, response 
 }
 
 type updateRequest struct {
-	ID int64 `json:"id"`
-	createRequest
+	ID        int64         `json:"id"`
+	Name      string        `json:"name"`
+	Class     string        `json:"class"`
+	Crew      int64         `json:"crew"`
+	Image     string        `json:"image"`
+	Value     float64       `json:"value"`
+	Status    string        `json:"status"`
+	Armaments []armamentReq `json:"armament"`
 }
 
 func decodeUpdateRequest(ctx context.Context, r *http.Request) (request interface{}, err error) {
@@ -135,7 +159,21 @@ func decodeUpdateRequest(ctx context.Context, r *http.Request) (request interfac
 		return nil, fmt.Errorf("decodeUpdateRequest(): %s", err)
 	}
 
-	return UpdateRequestModel(req), nil
+	armaments := make([]armamentReqModel, len(req.Armaments))
+	for i, armament := range req.Armaments {
+		armaments[i] = armamentReqModel(armament)
+	}
+
+	return UpdateRequestModel{
+		ID:        req.ID,
+		Name:      req.Name,
+		Class:     req.Class,
+		Crew:      req.Crew,
+		Image:     req.Image,
+		Value:     req.Value,
+		Status:    req.Status,
+		Armaments: armaments,
+	}, nil
 }
 
 func encodeUpdateResponse(ctx context.Context, w http.ResponseWriter, response interface{}) error {
@@ -179,12 +217,17 @@ func encodeDeleteByIDResponse(ctx context.Context, w http.ResponseWriter, respon
 	return json.NewEncoder(w).Encode(formatted)
 }
 
-func decodeGetAllRequest(ctx context.Context, r *http.Request) (request interface{}, err error) {
-	params := httprouter.ParamsFromContext(ctx)
+type spaceShipResponse struct {
+	ID     int64  `json:"id"`
+	Name   string `json:"name"`
+	Status string `json:"status"`
+}
 
-	name := params.ByName("name")
-	class := params.ByName("class")
-	status := params.ByName("status")
+func decodeGetAllRequest(ctx context.Context, r *http.Request) (request interface{}, err error) {
+	queryValues := r.URL.Query()
+	name := queryValues.Get("name")
+	class := queryValues.Get("class")
+	status := queryValues.Get("status")
 
 	return GetAllRequestModel{
 		Name:   name,

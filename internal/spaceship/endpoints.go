@@ -25,17 +25,31 @@ type CreateRequestModel struct {
 	Image     string
 	Value     float64
 	Status    string
-	Armaments []armamentReq
+	Armaments []armamentReqModel
+}
+
+type armamentReqModel struct {
+	Title string
+	Qty   int
 }
 
 func (r CreateRequestModel) ToEntity() entity.SpaceShip {
+	armaments := make([]entity.Armament, len(r.Armaments))
+	for i, armament := range r.Armaments {
+		armaments[i] = entity.Armament{
+			Title: armament.Title,
+			Qty:   armament.Qty,
+		}
+	}
+
 	return entity.SpaceShip{
-		Name:   r.Name,
-		Class:  r.Class,
-		Crew:   r.Crew,
-		Image:  r.Image,
-		Value:  r.Value,
-		Status: r.Status,
+		Name:      r.Name,
+		Class:     r.Class,
+		Crew:      r.Crew,
+		Image:     r.Image,
+		Value:     r.Value,
+		Status:    r.Status,
+		Armaments: armaments,
 	}
 }
 
@@ -88,18 +102,33 @@ func MakeEndpointGetByID(s Service) endpoint.Endpoint {
 }
 
 type UpdateRequestModel struct {
-	ID int64
-	createRequest
+	ID        int64
+	Name      string
+	Class     string
+	Crew      int64
+	Image     string
+	Value     float64
+	Status    string
+	Armaments []armamentReqModel
 }
 
 func (r UpdateRequestModel) ToEntity() entity.SpaceShip {
+	armaments := make([]entity.Armament, len(r.Armaments))
+	for i, armament := range r.Armaments {
+		armaments[i] = entity.Armament{
+			Title: armament.Title,
+			Qty:   armament.Qty,
+		}
+	}
+
 	return entity.SpaceShip{
-		Name:   r.Name,
-		Class:  r.Class,
-		Crew:   r.Crew,
-		Image:  r.Image,
-		Value:  r.Value,
-		Status: r.Status,
+		Name:      r.Name,
+		Class:     r.Class,
+		Crew:      r.Crew,
+		Image:     r.Image,
+		Value:     r.Value,
+		Status:    r.Status,
+		Armaments: armaments,
 	}
 }
 
@@ -176,11 +205,13 @@ func MakeEndpointGetAll(s Service) endpoint.Endpoint {
 			return nil, errors.New("MakeEndpointGetAll(): failed cast request")
 		}
 
-		_, err = s.GetAll(ctx, req.ToEntity())
+		spaceships, err := s.GetAll(ctx, req.ToEntity())
 		if err != nil {
 			return nil, fmt.Errorf("MakeEndpointGetAll(): %w", err)
 		}
 
-		return GetAllResponseModel{}, nil
+		return GetAllResponseModel{
+			SpaceShip: spaceships,
+		}, nil
 	}
 }

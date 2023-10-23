@@ -7,6 +7,14 @@ func formatCreateResponse(res CreateResponseModel) map[string]interface{} {
 }
 
 func formatGetByIDResponse(res GetByIDResponseModel) map[string]interface{} {
+	armaments := make([]armamentResponse, len(res.SpaceShip.Armaments))
+	for i, armament := range res.SpaceShip.Armaments {
+		armaments[i] = armamentResponse{
+			Title: armament.Title,
+			Qty:   armament.Qty,
+		}
+	}
+
 	return map[string]interface{}{
 		"id":       res.SpaceShip.ID,
 		"name":     res.SpaceShip.Name,
@@ -14,7 +22,7 @@ func formatGetByIDResponse(res GetByIDResponseModel) map[string]interface{} {
 		"crew":     res.SpaceShip.Crew,
 		"image":    res.SpaceShip.Value,
 		"status":   res.SpaceShip.Status,
-		"armament": res.SpaceShip.Armaments,
+		"armament": armaments,
 	}
 }
 
@@ -31,7 +39,16 @@ func formatDeleteByIDResponse(res DeleteByIDResponseModel) map[string]interface{
 }
 
 func formatGetAllResponse(res GetAllResponseModel) map[string]interface{} {
+	spaceships := make([]spaceShipResponse, len(res.SpaceShip))
+	for i, spaceship := range res.SpaceShip {
+		spaceships[i] = spaceShipResponse{
+			ID:     int64(spaceship.ID),
+			Name:   spaceship.Name,
+			Status: spaceship.Status,
+		}
+	}
+
 	return map[string]interface{}{
-		"data": map[string]interface{}{},
+		"data": spaceships,
 	}
 }
