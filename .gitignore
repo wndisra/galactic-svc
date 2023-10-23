@@ -19,3 +19,11 @@
 
 # Go workspace file
 go.work
+
+# Air configs
+tmp/
+.air.toml
+
+# Others
+tests.http
+.env
