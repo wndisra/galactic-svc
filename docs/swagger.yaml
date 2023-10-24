@@ -1,0 +1,152 @@
+definitions:
+  spaceship.armamentReq:
+    properties:
+      qty:
+        type: integer
+      title:
+        type: string
+    type: object
+  spaceship.createRequest:
+    properties:
+      armament:
+        items:
+          $ref: '#/definitions/spaceship.armamentReq'
+        type: array
+      class:
+        type: string
+      crew:
+        type: integer
+      image:
+        type: string
+      name:
+        type: string
+      status:
+        type: string
+      value:
+        type: number
+    type: object
+  spaceship.updateRequest:
+    properties:
+      armament:
+        items:
+          $ref: '#/definitions/spaceship.armamentReq'
+        type: array
+      class:
+        type: string
+      crew:
+        type: integer
+      id:
+        type: integer
+      image:
+        type: string
+      name:
+        type: string
+      status:
+        type: string
+      value:
+        type: number
+    type: object
+info:
+  contact: {}
+  description: The server APIs documentation for Galactic.
+  title: Galactic Service APIs
+paths:
+  /spaceship:
+    get:
+      description: Get all spaceships.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+        "500":
+          description: Internal Server Error
+      tags:
+      - Spaceship
+    post:
+      consumes:
+      - application/json
+      description: Create new spaceship.
+      parameters:
+      - description: Request body (JSON)
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/spaceship.createRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+        "500":
+          description: Internal Server Error
+      tags:
+      - Spaceship
+  /spaceship/{id}:
+    delete:
+      description: Delete existing spaceship by a specific ID.
+      parameters:
+      - description: Spaceship ID (integer)
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: Bad Request
+        "500":
+          description: Internal Server Error
+      tags:
+      - Spaceship
+    get:
+      description: Fetch existing spaceship by a specific ID.
+      parameters:
+      - description: Spaceship ID (integer)
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: Bad Request
+        "500":
+          description: Internal Server Error
+      tags:
+      - Spaceship
+    patch:
+      consumes:
+      - application/json
+      description: Update existing spaceship by a specific ID.
+      parameters:
+      - description: Spaceship ID (integer)
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Request body (JSON)
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/spaceship.updateRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: Bad Request
+        "500":
+          description: Internal Server Error
+      tags:
+      - Spaceship
+swagger: "2.0"

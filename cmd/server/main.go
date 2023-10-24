@@ -12,11 +12,15 @@ import (
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 
+	httpSwagger "github.com/swaggo/http-swagger"
+	"github.com/wndisra/galactic-svc/docs"
 	"github.com/wndisra/galactic-svc/internal/entity"
 	"github.com/wndisra/galactic-svc/internal/repository/database"
 	"github.com/wndisra/galactic-svc/internal/spaceship"
 )
 
+// @title Galactic Service APIs
+// @description The server APIs documentation for Galactic.
 func main() {
 	// Init logger
 	var logger log.Logger
@@ -53,6 +57,7 @@ func main() {
 
 	// Init router
 	router := httprouter.New()
+	docs.SwaggerInfo.BasePath = "/"
 
 	// Register routes
 	router.GET("/", func(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
@@ -64,6 +69,12 @@ func main() {
 
 	// Spaceships routes
 	spaceship.RegisterRoutes(router, spaceShipSvc)
+
+	// Swagger documentation
+	// TODO: enable for development env, disable for production env
+	router.GET("/swagger/*any", func(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
+		httpSwagger.WrapHandler(w, r)
+	})
 
 	// Listen & serve request
 	level.Info(logger).Log("msg", "server started successfully")

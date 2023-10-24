@@ -110,6 +110,7 @@ func encodeCreateResponse(ctx context.Context, w http.ResponseWriter, response i
 
 	formatted := formatCreateResponse(res)
 	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusCreated)
 
 	return json.NewEncoder(w).Encode(formatted)
 }

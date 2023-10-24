@@ -5,3 +5,6 @@ test:
 run-server:
 	@echo 'Make sure Air installed (https://github.com/cosmtrek/air#installation) ...'
 	air -d
+
+api-doc:
+	swag init -d ./cmd/server/,./internal/spaceship/
