@@ -10,9 +10,9 @@ import (
 )
 
 type SpaceShipRepository interface {
-	Insert(ctx context.Context, spaceship entity.SpaceShip) error
+	Insert(ctx context.Context, req entity.SpaceShip) error
 	GetByID(ctx context.Context, id int64) (entity.SpaceShip, error)
-	Update(ctx context.Context, id int64, spaceship entity.SpaceShip) error
+	Update(ctx context.Context, id int64, req entity.SpaceShip) error
 	Delete(ctx context.Context, id int64) error
 	GetAll(ctx context.Context, req entity.SpaceShip) ([]entity.SpaceShip, error)
 	DeleteArmaments(ctx context.Context, spaceshipID int64) error
@@ -30,8 +30,8 @@ func NewService(repo SpaceShipRepository, logger log.Logger) *service {
 	}
 }
 
-func (s *service) Create(ctx context.Context, spaceship entity.SpaceShip) error {
-	err := s.repo.Insert(ctx, spaceship)
+func (s *service) Create(ctx context.Context, req entity.SpaceShip) error {
+	err := s.repo.Insert(ctx, req)
 	if err != nil {
 		return err
 	}
@@ -40,10 +40,19 @@ func (s *service) Create(ctx context.Context, spaceship entity.SpaceShip) error 
 }
 
 func (s *service) GetByID(ctx context.Context, id int64) (entity.SpaceShip, error) {
-	return s.repo.GetByID(ctx, id)
+	spaceship, err := s.repo.GetByID(ctx, id)
+	if err != nil {
+		return entity.SpaceShip{}, err
+	}
+
+	if spaceship.ID == 0 {
+		return entity.SpaceShip{}, helpers.ErrBadRequest
+	}
+
+	return spaceship, nil
 }
 
-func (s *service) Update(ctx context.Context, id int64, spaceship entity.SpaceShip) error {
+func (s *service) Update(ctx context.Context, id int64, req entity.SpaceShip) error {
 	spaceship, err := s.repo.GetByID(ctx, id)
 	if err != nil {
 		return err
@@ -58,7 +67,7 @@ func (s *service) Update(ctx context.Context, id int64, spaceship entity.SpaceSh
 		return err
 	}
 
-	err = s.repo.Update(ctx, id, spaceship)
+	err = s.repo.Update(ctx, id, req)
 	if err != nil {
 		return err
 	}
@@ -67,7 +76,16 @@ func (s *service) Update(ctx context.Context, id int64, spaceship entity.SpaceSh
 }
 
 func (s *service) Delete(ctx context.Context, id int64) error {
-	err := s.repo.Delete(ctx, id)
+	spaceship, err := s.repo.GetByID(ctx, id)
+	if err != nil {
+		return err
+	}
+
+	if spaceship.ID == 0 {
+		return helpers.ErrBadRequest
+	}
+
+	err = s.repo.Delete(ctx, id)
 	if err != nil {
 		return err
 	}

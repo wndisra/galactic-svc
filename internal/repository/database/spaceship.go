@@ -3,6 +3,7 @@ package database
 import (
 	"context"
 	"errors"
+	"fmt"
 
 	"github.com/go-kit/log"
 	"github.com/go-kit/log/level"
@@ -23,15 +24,15 @@ func NewRepository(db *gorm.DB, logger log.Logger) *repository {
 	}
 }
 
-func (r *repository) Insert(ctx context.Context, spaceship entity.SpaceShip) error {
+func (r *repository) Insert(ctx context.Context, req entity.SpaceShip) error {
 	result := r.db.Create(&entity.SpaceShip{
-		Name:      spaceship.Name,
-		Class:     spaceship.Class,
-		Crew:      spaceship.Crew,
-		Image:     spaceship.Image,
-		Value:     spaceship.Value,
-		Status:    spaceship.Status,
-		Armaments: spaceship.Armaments,
+		Name:      req.Name,
+		Class:     req.Class,
+		Crew:      req.Crew,
+		Image:     req.Image,
+		Value:     req.Value,
+		Status:    req.Status,
+		Armaments: req.Armaments,
 	})
 
 	if result.Error != nil {
@@ -56,12 +57,13 @@ func (r *repository) GetByID(ctx context.Context, id int64) (entity.SpaceShip, e
 	return spaceship, nil
 }
 
-func (r *repository) Update(ctx context.Context, id int64, spaceship entity.SpaceShip) error {
+func (r *repository) Update(ctx context.Context, id int64, req entity.SpaceShip) error {
 	var entity entity.SpaceShip
 
 	r.db.First(&entity, "id = ?", id)
+	entity.Armaments = req.Armaments // ensure armaments data also updated
 
-	result := r.db.Model(&entity).Updates(spaceship)
+	result := r.db.Model(&entity).Updates(req)
 	err := result.Error
 	if err != nil {
 		level.Error(r.logger).Log("msg", "database.Update(): failed to update data in database")
@@ -87,11 +89,17 @@ func (r *repository) Delete(ctx context.Context, id int64) error {
 func (r *repository) GetAll(ctx context.Context, req entity.SpaceShip) ([]entity.SpaceShip, error) {
 	var spaceships []entity.SpaceShip
 
-	result := r.db.Where(&entity.SpaceShip{
-		Name:   req.Name,
-		Class:  req.Class,
-		Status: req.Status,
-	}).Find(&spaceships)
+	whereQuery := "name LIKE " + "'%" + req.Name + "%'"
+
+	if req.Class != "" {
+		whereQuery += fmt.Sprintf(" AND class = '%s'", req.Class)
+	}
+
+	if req.Status != "" {
+		whereQuery += fmt.Sprintf(" AND status = '%s'", req.Status)
+	}
+
+	result := r.db.Where(whereQuery).Find(&spaceships)
 	err := result.Error
 	if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
 		return []entity.SpaceShip{}, err

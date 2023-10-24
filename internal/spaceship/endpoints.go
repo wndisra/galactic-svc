@@ -11,9 +11,9 @@ import (
 )
 
 type Service interface {
-	Create(ctx context.Context, spaceship entity.SpaceShip) error
+	Create(ctx context.Context, req entity.SpaceShip) error
 	GetByID(ctx context.Context, id int64) (entity.SpaceShip, error)
-	Update(ctx context.Context, id int64, spaceship entity.SpaceShip) error
+	Update(ctx context.Context, id int64, req entity.SpaceShip) error
 	Delete(ctx context.Context, id int64) error
 	GetAll(ctx context.Context, req entity.SpaceShip) ([]entity.SpaceShip, error)
 }
