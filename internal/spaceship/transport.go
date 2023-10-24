@@ -9,6 +9,7 @@ import (
 
 	ht "github.com/go-kit/kit/transport/http"
 	"github.com/julienschmidt/httprouter"
+
 	"github.com/wndisra/galactic-svc/internal/helpers"
 )
 
