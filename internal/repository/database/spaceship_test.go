@@ -396,7 +396,6 @@ func TestRepository_Delete(t *testing.T) {
 func TestRepository_GetAll(t *testing.T) {
 	query := "SELECT * FROM `space_ships` WHERE name LIKE '%%' AND `space_ships`.`deleted_at` IS NULL"
 	queryWithFilter := "SELECT * FROM `space_ships` WHERE (name LIKE '%Devas%' AND class = 'Star Destroyer' AND status = 'Operational') AND `space_ships`.`deleted_at` IS NULL"
-	// preloadQuery := "SELECT * FROM `computers` WHERE `computers`.`id` = ? AND `computers`.`deleted_at` IS NULL"
 
 	tests := []struct {
 		name    string
